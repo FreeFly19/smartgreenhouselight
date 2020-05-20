@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class LightSwitchScheduleExecutor {
     private final LightSwitchRepository lightSwitchRepository;
+    private Boolean prevValue = null;
 
     @PostConstruct
     public void init() {
@@ -22,10 +23,15 @@ public class LightSwitchScheduleExecutor {
     }
 
     private void updateLightSwitchesEnabledState() {
-        if (Instant.now().atZone(ZoneId.of("Europe/Kiev")).getHour() < 8) {
-            lightSwitchRepository.updateEnabledState(false);
-        } else {
-            lightSwitchRepository.updateEnabledState(true);
+        boolean haveToBeEnabled = evaluateEnableRules();
+
+        if (this.prevValue == null || this.prevValue != haveToBeEnabled) {
+            lightSwitchRepository.updateEnabledState(haveToBeEnabled);
+            this.prevValue = haveToBeEnabled;
         }
+    }
+
+    private boolean evaluateEnableRules() {
+        return Instant.now().atZone(ZoneId.of("Europe/Kiev")).getHour() >= 8;
     }
 }
