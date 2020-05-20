@@ -4,7 +4,7 @@ WORKDIR /tmp
 COPY . /tmp
 
 RUN chmod +x gradlew
-RUN ./gradlew clean build --no-daemon --debug-jvm -x test
+RUN ./gradlew clean build -x test
 
 FROM openjdk:11-jre
 
