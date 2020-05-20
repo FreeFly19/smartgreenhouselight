@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Smart Greenhouse Light</title>
+</head>
+<body>
+
+<div id="app">
+    <div v-for="ls of lightSwitches">
+        <b>{{ls.id}}</b> {{ls.enabled ? 'Enabled' : 'Disabled'}}
+        <button class="btn btn-primary" @click="toggleState(ls)">{{ls.enabled ? 'Disable' : 'Enable'}}</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            lightSwitches: []
+        },
+        created() {
+            this.updateLightSwitches();
+            setInterval(this.updateLightSwitches, 60000);
+        },
+        methods: {
+            updateLightSwitches() {
+                fetch('/api/light-switches')
+                    .then(res => res.json())
+                    .then(lightSwitches => {
+                        this.lightSwitches = lightSwitches;
+                    });
+            },
+            toggleState(ls) {
+                fetch('/api/light-switches/' + ls.id + '/enabled', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(!ls.enabled)
+                }).then(() => this.updateLightSwitches());
+            }
+        }
+    })
+</script>
+</body>
+</html>
